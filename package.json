@@ -1,0 +1,33 @@
+{
+  "name": "dictionary",
+  "version": "1.0.0",
+  "description": "Simple console dictionary application, implemented using Oxford-Dictionary API.",
+  "main": "dict.js",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "https": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node dict.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neloydutta/dictionary.git"
+  },
+  "keywords": [
+    "Dictionary",
+    "Console",
+    "Desktop",
+    "Node.JS",
+    "Javascript",
+    "express.js",
+    "OxfordDictionary"
+  ],
+  "author": "neloydutta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/neloydutta/dictionary/issues"
+  },
+  "homepage": "https://github.com/neloydutta/dictionary#readme"
+}
