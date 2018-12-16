@@ -1,6 +1,6 @@
 const https = require('https');
 const fs = require('fs');
-var readline = require('readline-sync');
+const readline = require('readline-sync');
 var app_id = "";
 var app_key = "";
 var usage = "Usage:\nnode dict.js <def|syn|ant> <word>\nor\nnode dict.js play\nor\nnode dict.js";
@@ -9,6 +9,9 @@ var word_arr = ['discriminate', 'superb', 'compunction', 'prevail', 'ellipsis', 
 var playflag = false;
 var play_list = [[],[],[]];
 
+/*Function for, initialization of the application.
+  Main purpose: initializes the app_id and app_key for Oxford Dictionary API
+*/
 var app_init = function(cb) {
     if(fs.existsSync('./secret.json')){
         fs.readFile('./secret.json','ascii', (err, data) => {
@@ -45,6 +48,8 @@ var app_init = function(cb) {
     }
 }
 
+/* Function to handle Oxford Dictionary API calls,
+   for Definitions, synonyms and antonyms*/
 var oxforddictionarycall = function(type,cb){
     var params = {
         host :  'od-api.oxforddictionaries.com',
@@ -98,6 +103,7 @@ var oxforddictionarycall = function(type,cb){
     }
 }; 
 
+/* Function handles word play */
 var wordplay = function(){
     var hint_text = 'Here\'s a hint, ';
     var game_text = '\nGuess the word with the help of hint given! (use option \'hint\' for more hints)';
@@ -139,6 +145,9 @@ var wordplay = function(){
     }
 }
 
+/* Function handles retrival and disply Definition to the console, 
+   from the result provided by Oxford Dictionary API
+*/
 var definition = function(error, result){
     if(error) console.log(error);
     if(result){
@@ -159,6 +168,9 @@ var definition = function(error, result){
     }
 }
 
+/* Function handles retrival and disply Syninyms to the console, 
+   from the result provided by Oxford Dictionary API
+*/
 var synonyms = function(error, result){
     if(error) console.log(error);
     if(result) {
@@ -187,6 +199,9 @@ var synonyms = function(error, result){
     }
 }
 
+/* Function handles retrival and display Antonyms to the console, 
+   from the result provided by Oxford Dictionary API
+*/
 var antonyms = function(error, result){
     if(error) console.log(error);
     if(result) {
@@ -217,10 +232,15 @@ var antonyms = function(error, result){
     }
 }
 
+/* Prints error,
+   used while Word of the Day, to print error to console
+*/
 var printerr = function(err){
     console.log(err);
 }
 
+/* Starts the Application, after the Application variable are initialized, by app_init()
+*/
 var run_app = function(type){
     try{
         if('def' == type)
