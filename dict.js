@@ -79,24 +79,26 @@ var oxforddictionarycall = function(type,cb){
 
 var definition = function(error, result){
     if(error) console.log(error);
-    if(result) console.log('Definition: '+result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]);
+    if(result) console.log('\nDefinition: '+result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]);
 }
 
 var synonyms = function(error, result){
     if(error) console.log(error);
     if(result) {
-        console.log('Synonyms: ');
+        console.log('\nSynonyms: ');
         for(entry in result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms']){
-            console.log(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text']);
+            if(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text'].indexOf(' ')==-1)
+                console.log(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text']);
         }
     }
 }
 var antonyms = function(error, result){
     if(error) console.log(error);
     if(result) {
-        console.log('Antonyms: ');
+        console.log('\nAntonyms: ');
         for(entry in result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms']){
-            console.log(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text']);
+            if(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text'].indexOf(' ')==-1)
+                console.log(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text']);
         }
     }
 }
@@ -105,6 +107,7 @@ var printerr = function(err){
 }
 
 var run_app = function(type){
+    try{
     if('def' == type)
         oxforddictionarycall(word,definition);
     else if('syn' == type)
@@ -112,10 +115,16 @@ var run_app = function(type){
     else if('ant' == type)
         oxforddictionarycall(word+'/antonyms',antonyms);
     else if('wod' == type){
-        
         oxforddictionarycall(word_arr[Math.floor((Math.random() * word_arr.length))],0);
+    }
+    else if('play' == type){
+
     }
     else
         console.log('Invalid Arguments!\n'+usage);
+    }
+    catch(exp){
+        console.log('Oops! Things didn\'t go as expected!');
+    }
 }
 app_init(run_app);
