@@ -10,27 +10,39 @@ var playflag = false;
 var play_list = [[],[],[]];
 
 var app_init = function(cb) {
-    fs.readFile('./secret.json','ascii', (err, data) => {
-        if (err) throw err;
-        data = JSON.parse(data);
-        app_id = data["app_id"]
-        app_key = data["app_key"]
-        if(process.argv.length == 2){
-            word = 'good';
-            cb('wod');
-        }
-        else if(process.argv.length == 4){
-            word = process.argv[3];
-            cb(process.argv[2]);
-        }
-        else if(process.argv.length == 3 && process.argv[2]=='play'){
-            cb(process.argv[2]);
-        }
-        else{
-            console.log('Invalid Arguments!\n' + usage);
-            return;
-        }
-    });
+    if(fs.existsSync('./secret.json')){
+        fs.readFile('./secret.json','ascii', (err, data) => {
+            if (err) throw err;
+            try{
+                data = JSON.parse(data);
+                app_id = data["app_id"]
+                app_key = data["app_key"]
+            }
+            catch(exp){
+                console.log('Application\'s Initialization failed!');
+                process.exit(1);
+            }
+            if(process.argv.length == 2){
+                word = 'good';
+                cb('wod');
+            }
+            else if(process.argv.length == 4){
+                word = process.argv[3];
+                cb(process.argv[2]);
+            }
+            else if(process.argv.length == 3 && process.argv[2]=='play'){
+                cb(process.argv[2]);
+            }
+            else{
+                console.log('Invalid Arguments!\n' + usage);
+                process.exit(1);
+            }
+        });
+    }
+    else{
+        console.log('Application\'s Initialization failed!');
+        process.exit(1);
+    }
 }
 
 var oxforddictionarycall = function(type,cb){
@@ -52,43 +64,41 @@ var oxforddictionarycall = function(type,cb){
         cb=printerr;
     }
     try{
-    https.get(params, function(res) {
-        if(res.statusCode == 404){
-            cb("No such entry found");
-        }
-        else{
-            var data = "";
-            res.on('data', function(chunk) {
-                    data +=  chunk;
-            }).on('end',function(){
-                try {
-                    result = JSON.parse(data);
-                } 
-                catch (exp) {
-                    cb('JSON Parse failed');
-                }
-                if(wod==true){
-                    if(cb_count==0){ oxforddictionarycall(word+'/synonyms',cb_count+1); definition(null, result);}
-                    else if(cb_count==1){ oxforddictionarycall(word+'/antonyms',cb_count+1); synonyms(null, result);}
-                    else if(cb_count==2){ antonyms(null, result);}
-                }
-                else cb(null,result);
-            }).on('error',function(err){
-                cb(err);    
-            });
-        }
-    });
+        https.get(params, function(res) {
+            if(res.statusCode == 404){
+                cb("No such entry found");
+            }
+            else{
+                var data = "";
+                res.on('data', function(chunk) {
+                        data +=  chunk;
+                }).on('end',function(){
+                    try {
+                        result = JSON.parse(data);
+                    } 
+                    catch (exp) {
+                        cb('Application\' execution failed!');
+                        process.exit(1);
+                    }
+                    if(wod==true){
+                        if(cb_count==0){ oxforddictionarycall(word+'/synonyms',cb_count+1); definition(null, result);}
+                        else if(cb_count==1){ oxforddictionarycall(word+'/antonyms',cb_count+1); synonyms(null, result);}
+                        else if(cb_count==2){ antonyms(null, result);}
+                    }
+                    else cb(null,result);
+                }).on('error',function(err){
+                    cb(err);    
+                });
+            }
+        });
     }
     catch(exp){
-        console.log('Oops! Things didn\'t go as expected!');
-        return;
+        console.log('Application\'s execution failed!');
+        process.exit(1);
     }
 }; 
 
 var wordplay = function(){
-    //console.log(play_list[0]);
-    //console.log(play_list[1]);
-    //console.log(play_list[2]);
     var hint_text = 'Here\'s a hint, ';
     var game_test = '\nGuess the word: ';
     var hint_flag = 0;
@@ -124,32 +134,47 @@ var wordplay = function(){
 var definition = function(error, result){
     if(error) console.log(error);
     if(result){
-        if(playflag==true){
-            play_list[0].push('Definition: ' + result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]);
-            return;
+        try{
+            if(playflag!=true) console.log('Definitions:');
+            for(entry in result['results'][0]['lexicalEntries']){
+                if(playflag==true){
+                    play_list[0].push('Definition: ' + result['results'][0]['lexicalEntries'][entry]['entries'][0]['senses'][0]['definitions'][0]);
+                    continue;
+                }
+                console.log('  as '+result['results'][0]['lexicalEntries'][entry]['lexicalCategory']+': '+result['results'][0]['lexicalEntries'][entry]['entries'][0]['senses'][0]['definitions'][0]);                
+            }
         }
-        console.log('\nDefinition: '+result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]);
+        catch(exp){
+            console.log('Application\'s execution failed!');
+            process.exit(1);
+        }
     }
 }
 
 var synonyms = function(error, result){
     if(error) console.log(error);
     if(result) {
-        if(playflag!=true) console.log('\nSynonyms: ');
-        for(entry in result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms']){
-            if(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text'].indexOf(' ')==-1){
-                if(playflag==true){
-                    play_list[1].push('Synonyms: ' + result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text']);
-                    continue;
+        try{
+            if(playflag!=true) console.log('\nSynonyms: ');
+            for(entry in result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms']){
+                if(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text'].indexOf(' ')==-1){
+                    if(playflag==true){
+                        play_list[1].push('Synonyms: ' + result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text']);
+                        continue;
+                    }
+                    console.log('  '+result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text']);
                 }
-                console.log(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text']);
-            }
-            else{
-                if(playflag==true){
-                    play_list[0].push('Definition: ' + result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text']);
-                    continue;
+                else{
+                    if(playflag==true){
+                        play_list[0].push('Definition: ' + result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['synonyms'][entry]['text']);
+                        continue;
+                    }
                 }
             }
+        }
+        catch(exp){
+            console.log('Application\'s execution failed!');
+            process.exit(1);
         }
     }
 }
@@ -157,20 +182,26 @@ var synonyms = function(error, result){
 var antonyms = function(error, result){
     if(error) console.log(error);
     if(result) {
-        if(playflag!=true) console.log('\nAntonyms: ');
-        for(entry in result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms']){
-            if(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text'].indexOf(' ')==-1){
-                if(playflag==true){
-                    play_list[2].push('Antonyms: ' + result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text']);
-                    continue;
+        try{
+            if(playflag!=true) console.log('\nAntonyms: ');
+            for(entry in result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms']){
+                if(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text'].indexOf(' ')==-1){
+                    if(playflag==true){
+                        play_list[2].push('Antonyms: ' + result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text']);
+                        continue;
+                    }
+                    console.log('  '+result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text']);
                 }
-                console.log(result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text']);
-            }
-            else{
-                if(playflag==true){
-                    play_list[0].push('Definition: ' + result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text']);
+                else{
+                    if(playflag==true){
+                        play_list[0].push('Definition: ' + result['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['antonyms'][entry]['text']);
+                    }
                 }
             }
+        }
+        catch(exp){
+            console.log('Application\'s execution failed!');
+            process.exit(1);
         }
     }
     if(playflag==true){
@@ -202,7 +233,8 @@ var run_app = function(type){
             console.log('Invalid Arguments!\n'+usage);
         }
     catch(exp){
-        console.log('Oops! Things didn\'t go as expected!');
+        console.log('Application\'s execution failed!');
+        process.exit(1);
     }
 }
 
