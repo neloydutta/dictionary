@@ -86,8 +86,8 @@ var oxforddictionarycall = function(type,cb){
                         process.exit(1);
                     }
                     if(wod==true){
-                        if(cb_count==0){ oxforddictionarycall(word+'/synonyms',cb_count+1); definition(null, result);}
-                        else if(cb_count==1){ oxforddictionarycall(word,cb_count+1); examples(null, result);}
+                        if(cb_count==0){ oxforddictionarycall(word,cb_count+1); definition(null, result);}
+                        else if(cb_count==1){ oxforddictionarycall(word+'/synonyms',cb_count+1); if(playflag!=true) examples(null, result);}
                         else if(cb_count==2){ oxforddictionarycall(word+'/antonyms',cb_count+1); synonyms(null, result);}
                         else if(cb_count==3){ antonyms(null, result);}
                     }
