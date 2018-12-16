@@ -5,7 +5,8 @@
   "main": "dict.js",
   "dependencies": {
     "fs": "0.0.1-security",
-    "https": "^1.0.0"
+    "https": "^1.0.0",
+    "readline-sync": "^1.4.9"
   },
   "devDependencies": {},
   "scripts": {
