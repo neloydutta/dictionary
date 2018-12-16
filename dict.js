@@ -168,6 +168,26 @@ var definition = function(error, result){
     }
 }
 
+/* Function handles retrival and disply Examples to the console, 
+   from the result provided by Oxford Dictionary API
+*/
+var examples = function(error, result){
+    if(error) console.log(error);
+    if(result){
+        try{
+            console.log('Examples:');
+            for(entry in result['results'][0]['lexicalEntries']){
+                console.log('  as '+result['results'][0]['lexicalEntries'][entry]['lexicalCategory']+': '+result['results'][0]['lexicalEntries'][entry]['entries'][0]['senses'][0]['examples'][0]['text']);
+            }
+        }
+        catch(exp){
+            console.log(exp);
+            console.log('Application\'s execution failed!');
+            process.exit(1);
+        }
+    }
+}
+
 /* Function handles retrival and disply Syninyms to the console, 
    from the result provided by Oxford Dictionary API
 */
@@ -249,6 +269,8 @@ var run_app = function(type){
             oxforddictionarycall(word+'/synonyms',synonyms);
         else if('ant' == type)
             oxforddictionarycall(word+'/antonyms',antonyms);
+        else if('ex' == type)
+            oxforddictionarycall(word,examples);
         else if('wod' == type){
             oxforddictionarycall(word_arr[Math.floor(((Math.random() * 100) % word_arr.length))],0);
         }
