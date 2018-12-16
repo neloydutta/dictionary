@@ -87,8 +87,9 @@ var oxforddictionarycall = function(type,cb){
                     }
                     if(wod==true){
                         if(cb_count==0){ oxforddictionarycall(word+'/synonyms',cb_count+1); definition(null, result);}
-                        else if(cb_count==1){ oxforddictionarycall(word+'/antonyms',cb_count+1); synonyms(null, result);}
-                        else if(cb_count==2){ antonyms(null, result);}
+                        else if(cb_count==1){ oxforddictionarycall(word,cb_count+1); examples(null, result);}
+                        else if(cb_count==2){ oxforddictionarycall(word+'/antonyms',cb_count+1); synonyms(null, result);}
+                        else if(cb_count==3){ antonyms(null, result);}
                     }
                     else cb(null,result);
                 }).on('error',function(err){
@@ -149,10 +150,10 @@ var wordplay = function(){
    from the result provided by Oxford Dictionary API
 */
 var definition = function(error, result){
-    if(error) console.log(error);
+    if(error) console.log('Error for definition, '+error);
     if(result){
         try{
-            if(playflag!=true) console.log('Definitions:');
+            if(playflag!=true) console.log('\nDefinitions:');
             for(entry in result['results'][0]['lexicalEntries']){
                 if(playflag==true){
                     play_list[0].push('Definition: ' + result['results'][0]['lexicalEntries'][entry]['entries'][0]['senses'][0]['definitions'][0]);
@@ -172,12 +173,14 @@ var definition = function(error, result){
    from the result provided by Oxford Dictionary API
 */
 var examples = function(error, result){
-    if(error) console.log(error);
+    if(error) console.log('Error for examples, '+error);
     if(result){
         try{
-            console.log('Examples:');
+            console.log('\nExamples:');
             for(entry in result['results'][0]['lexicalEntries']){
-                console.log('  as '+result['results'][0]['lexicalEntries'][entry]['lexicalCategory']+': '+result['results'][0]['lexicalEntries'][entry]['entries'][0]['senses'][0]['examples'][0]['text']);
+                for(example in result['results'][0]['lexicalEntries'][entry]['entries'][0]['senses'][0]['examples']){
+                    console.log('  as '+result['results'][0]['lexicalEntries'][entry]['lexicalCategory']+': '+result['results'][0]['lexicalEntries'][entry]['entries'][0]['senses'][0]['examples'][example]['text']);
+                }
             }
         }
         catch(exp){
@@ -192,7 +195,7 @@ var examples = function(error, result){
    from the result provided by Oxford Dictionary API
 */
 var synonyms = function(error, result){
-    if(error) console.log(error);
+    if(error) console.log('Error for syninyms, '+error);
     if(result) {
         try{
             if(playflag!=true) console.log('\nSynonyms: ');
@@ -223,7 +226,7 @@ var synonyms = function(error, result){
    from the result provided by Oxford Dictionary API
 */
 var antonyms = function(error, result){
-    if(error) console.log(error);
+    if(error) console.log('Error for antonyms, '+error);
     if(result) {
         try{
             if(playflag!=true) console.log('\nAntonyms: ');
